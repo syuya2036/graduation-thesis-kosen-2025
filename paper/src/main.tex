@@ -164,8 +164,43 @@ The findings of this study provide valuable solutions to both academic and pract
 \end{proof}
 
 \section{計算量}
-\subsection{O記法}
+
+本章では、アルゴリズムの効率性を評価する指標として広く用いられる $O$ 記法とその基本的な性質について説明する．
+
+\subsection{$O$記法}
+
+\begin{definition}[$O$記法]
+    整数$N$に対して定義されている関数$f, g$に対し，
+    \[
+    f(N) = O(g(N)) \quad
+    \]
+    であるとは，ある正の実数$c$と0以上の整数$N_0$が存在して，任意の$N \geq N_0$に対して
+    \[
+    |f(N)| \leq c|g(N)|
+    \]
+    が成り立つことをいう．
+\end{definition}
+多変数についても同様に定義される．
+
 \subsection{O記法の性質}
+
+以下に，$O$記法の基本的な性質を示す．
+
+\paragraph{和:}
+\[
+O(f(n)) + O(f(n)) = O(f(n)).
+\]
+
+\paragraph{積:}
+\[
+O(f(n))O(g(n)) = O(f(n)g(n)), \quad f(n)O(g(n)) = O(f(n)g(n)).
+\]
+
+\paragraph{定数倍:}
+\[
+O(cf(n)) = O(f(n)) \quad (c \neq 0).
+\]
+
 \section{累積和}
 \subsection{一次元累積和}
 \subsection{二次元累積和}
