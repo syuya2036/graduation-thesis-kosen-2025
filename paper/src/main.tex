@@ -1,0 +1,199 @@
+\documentclass{jsreport}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\theoremstyle{plain} % デフォルトのスタイル
+
+\newtheorem{theorem}{定理}
+
+\theoremstyle{definition}
+\newtheorem{definition}{定義}
+
+\def\proofname{\textbf{証明}}
+
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{url}
+
+\title{多次元累積和の一般化とその計算効率に関する研究 \\Generalization of Multi-Dimensional Cumulative Sums \\ and Their Computational Efficiency}
+
+\author{千田研究室 \quad 後藤柊矢\\Chida Laboratory \quad Shuya GOTO}
+\date{令和6年xx月xx日}
+
+\begin{document}
+\maketitle
+
+\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+This study focuses on the formalization of the theory of multidimensional cumulative sums and the development of efficient computation methods utilizing this theory. While cumulative sums are widely used to quickly compute range sums in one- and two-dimensional data arrays, research on extending this approach to higher-dimensional data and improving its computational efficiency remains insufficient. Building upon existing theories for one- and two-dimensional cumulative sums, this study proposes a generalized method that can be extended to arbitrary dimensions \(D\).
+
+The proposed method constructs an algorithm that achieves a computational complexity of \({O}(N 2^D)\) for preprocessing cumulative sums with data size \(N\) and \({O}(2^D)\) for query processing. By applying the principle of inclusion-exclusion, the method efficiently computes the total sum over arbitrary subregions in a multidimensional space. Additionally, leveraging bit representations for indices optimizes set operations in higher dimensions, simplifying the implementation process.
+
+Furthermore, this study investigates how computational time increases with the growth of the dimensionality \(D\) through numerical experiments.
+
+The findings of this study provide valuable solutions to both academic and practical challenges aimed at the efficient analysis of high-dimensional data. In particular, the generalization of multidimensional cumulative sums and insights into improving their computational efficiency are expected to contribute significantly to the advancement of high-dimensional data processing techniques.
+
+\end{abstract}
+
+\tableofcontents
+
+\chapter{序論}
+
+\section{背景}
+
+累積和のアルゴリズムは、データ列に対する区間和の計算を高速に行うための手法として、情報処理のさまざまな場面で広く利用されてきた。一次元累積和の基本的な考え方は、与えられたデータ列に対してあらかじめ前計算をしておくことで、後続のクエリに対して効率的な応答を可能にするというものである。これにより、区間和の計算を単純な反復処理による計算量 \({O}(N)\) から定数時間の計算量 \({O}(1)\) に削減することができる。累積和の概念は二次元へと拡張され、画像処理や地理情報システム（GIS）、データ分析など、より広範な分野においても応用が進んだ。
+
+しかしながら、現行の累積和アルゴリズムは主に一次元または二次元のデータを対象としており、人間が視覚的に直感しやすい次元に留まっているのが現状である。三次元以上の高次元データに関する累積和アルゴリズムは十分に一般化されておらず、理論的な整備や実装の試みは限られている。
+
+近年、データサイエンスや機械学習、ビッグデータ解析の発展に伴い、膨大な高次元データを扱う機会が増加している。例えば、画像解析では通常は二次元データが用いられるが、時間軸を加えることで三次元、さらに複数のセンサ情報を統合すれば四次元以上のデータが生成される。同様に、地理情報システム（GIS）や物理シミュレーションでは、空間的次元に時間的要素や他の物理的変数を組み合わせた多次元データが扱われることが一般的である。これらの応用分野において、任意の次元に対応する累積和アルゴリズムの理論的基盤が整備されていれば、これまで計算上の困難が伴っていた高次元データ解析の課題に対して実用的な解決策を提供できる可能性がある．
+
+本研究では、一次元および二次元累積和の基礎理論を出発点として、それを三次元以上の高次元データに拡張するための理論の定式化と計算アルゴリズムの構築を目指した。このような理論の整備は、将来的に高次元データ解析が必要となる際に大きな利便性をもたらすだろう。
+
+本研究では、高次元累積和の効率的な構築手法とクエリ処理アルゴリズムを提案し，この分野における新たな基盤的知見を提供することを目的としている。
+
+\newpage
+\section{目的}
+
+本研究の目的を以下に示す．
+
+\begin{enumerate}
+    \item \textbf{ビット表記を用いた多次元累積和のアルゴリズムを示し、その正当性を包除原理を用いて証明する:}
+
+
+     高次元データの各次元の添字が複数の集合を定義し、これらの集合に対して包除原理を適用することで任意の部分領域における総和を効率的に計算する仕組みを構築する。この定式化において、添字をビット表記で表現することで、高次元空間における集合演算を効率化し、アルゴリズムの単純化および計算効率の向上を図る。
+
+    \item \textbf{多次元累積和アルゴリズムのプログラムによる実装を示す:}
+
+    この実装では、理論で示したアルゴリズムの構築手順を忠実に再現するとともに、プログラムの汎用性および可読性を考慮した設計を行う。特に、任意の次元 \(D\) に対応可能な柔軟な実装を目指す。
+
+    \item \textbf{実装したアルゴリズムの性能評価を行う:}
+
+    データ数 \(N\) を固定し，本論文で示した多次元累積和アルゴリズムと愚直に総和を求める方法とでクエリ処理にかかる時間を測定し，本研究の有用性を示す．
+
+\end{enumerate}
+
+\chapter{準備}
+
+\section{集合論}
+\subsection{記法}
+
+\begin{itemize}
+    \item 集合$A$の要素数を $|A|$ で表す．
+    \item $x$が集合$A$の元であることを$x \in A$で表す．
+\end{itemize}
+
+\subsection{集合の演算}
+
+\begin{definition}[和集合]
+    二つの集合 $A, B$について，$A$と$B$のいずれか少なくとも一方に含まれるような元の集合を$A$と$B$の和集合といい， $A \cup B$で表す．すなわち，
+
+    \begin{equation}
+        A \cup B := \{x | x \in A または x \in B \}
+    \end{equation}
+
+    である．
+
+\end{definition}
+
+\begin{definition}[積集合]
+    二つの集合 $A$ と $B$ 両方に含まれる元全体の集合を$A$と$B$の積集合といい，$A \cap B$で表す．すなわち，
+    \begin{equation}
+        A \cap B := \{x | x \in A かつ x \in B \}
+    \end{equation}
+    である．
+\end{definition}
+
+また，以下に示す結合法則と分配法則が成り立つことが知られている．
+\begin{theorem}[結合法則]  集合$A, B, C$について以下の式が成り立つ．
+    \begin{equation}
+        (A \cup B) \cup C = A \cup (B \cup C)
+    \end{equation}
+    \begin{equation}
+        (A \cap B) \cap C = A \cap (B \cap C)
+    \end{equation}
+\end{theorem}
+
+\begin{theorem}[分配法則] 集合$A, B, C$について以下の式が成り立つ．
+    \begin{equation}
+        A \cup (B \cap C) = (A \cup B) \cap (A \cup C)
+    \end{equation}
+    \begin{equation}
+        A \cap (B \cup C) = (A \cap B) \cup (A \cap C)
+    \end{equation}
+\end{theorem}
+
+\subsection{包除原理}
+有限集合$A$と$B$に対して和集合の要素数$A \cup B$を求めるには，まずそれぞれに属する要素数$|A$と$B$を足し合わせ，その後$A$と$B$の積集合$A \cap B$の要素数を引けば良い．
+具体的には，以下の式が成り立つ．
+\begin{equation}
+    |A \cup B| = |A| + |B| - |A \cap B|
+\end{equation}
+
+また，$n$個の集合$A_1, A_2, \ldots, A_n$の和集合の要素数について，以下の式が成り立つ．
+\begin{theorem}[包除原理]
+        \begin{align}
+        \left| \bigcup_{i=1}^{n} A_i \right|
+        &= \sum_i |A_i| \notag \\
+        &\quad - \sum_{i < j} |A_i \cap A_j| \notag \\
+        &\quad + \sum_{i < j < k} |A_i \cap A_j \cap A_k| \notag \\
+        &\quad - \cdots \notag \\
+        &\quad + (-1)^{n-1} |A_1 \cap \cdots \cap A_n|.
+        \end{align}
+\end{theorem}
+
+これを包除原理(Principle of Inclusion-Exclusion, PIE)という．
+
+\begin{proof}
+集合ちょうど$m$個の共通部分は，右辺第$k$項において$(-1)^{k-1}\binom{m}{k}$だけ足されるので，合計で
+\[
+\sum_{k=1}^m (-1)^{k-1} \binom{m}{k}
+\]
+となる．
+
+ここで、二項定理より
+\begin{align}
+    0 &= (1 - 1)^m  \notag \\
+    &= \sum_{k=0}^m \binom{m}{k} (-1)^k  \notag \\
+    &= \binom{m}{0} + \sum_{k=1}^m \binom{m}{k} (-1)^k  \notag \\
+    &= 1 - \sum_{k=1}^m \binom{m}{k} (-1)^{k-1} \notag \\
+    \therefore &\sum_{k=1}^m (-1)^{k-1} \binom{m}{k} = 1\notag
+\end{align}
+
+したがって、どんな$m$に対してもこの数え上げが常に $1$ であることが分かり、包除原理が成り立つことが示された。
+\end{proof}
+
+\section{計算量}
+\subsection{O記法}
+\subsection{O記法の性質}
+\section{累積和}
+\subsection{一次元累積和}
+\subsection{二次元累積和}
+
+\chapter{多次元累積和}
+\section{二次元累積和の包除原理による定式化}
+\section{包除原理を用いた三次元累積和の導出}
+\section{多次元累積和のアルゴリズム}
+\section{正当性の証明}
+
+\chapter{性能評価}
+
+\chapter*{謝辞}
+本研究を進めるにあたり,xxxxx 氏に深く感謝いたします. ありがとうございました.
+
+\begin{thebibliography}{99}
+\bibitem{card}水木敬明, "カード組を用いた秘密計算", 電子情報通信学会 基礎・境界ソサイエティ Fundamentals Review, 2016年9巻3号pp179-187, 2016.
+
+\bibitem{3card}Raimu Isuzugawa, Kodai Toyoda, Yu Sasaki, Daiki Miyahara, Takaaki Mizuki, "A Card-Minimal Three-Input AND Protocol Using Two Shuffles", Computing and Combinatorics (COCOON 2021), 2021.
+
+
+
+\bibitem{evaluation}吉田拓叶, 千田栄幸, 水木敬明, "説明動画再生時間に基づくカードベースプロトコルの評価", 電子情報通信学会 2023年暗号と情報セキュリティシンポジウム予稿集, 4F2-1, 2023
+
+\bibitem{himitu}NRI 野村総合研究所, "秘密計算|用語解説|野村総合研究所", \url{https://www.nri.com/jp/knowledge/glossary/lst/ha/secure_computation}, （参照2023-02-10）
+
+\end{thebibliography}
+
+
+
+\end{document}
