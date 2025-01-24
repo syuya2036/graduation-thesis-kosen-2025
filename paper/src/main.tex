@@ -4,9 +4,15 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{amsmath}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+
+\usepackage[margin=16truemm]{geometry}
+
 \theoremstyle{plain} % デフォルトのスタイル
 
 \newtheorem{theorem}{定理}
+\newtheorem{lemma}{補題}
 
 \theoremstyle{definition}
 \newtheorem{definition}{定義}
@@ -50,9 +56,8 @@ The findings of this study provide valuable solutions to both academic and pract
 
 本研究では、一次元および二次元累積和の基礎理論を出発点として、それを三次元以上の高次元データに拡張するための理論の定式化と計算アルゴリズムの構築を目指した。このような理論の整備は、将来的に高次元データ解析が必要となる際に大きな利便性をもたらすだろう。
 
-本研究では、高次元累積和の効率的な構築手法とクエリ処理アルゴリズムを提案し，この分野における新たな基盤的知見を提供することを目的としている。
 
-\newpage
+% \newpage
 \section{目的}
 
 本研究の目的を以下に示す．
@@ -124,7 +129,7 @@ The findings of this study provide valuable solutions to both academic and pract
 \end{theorem}
 
 \subsection{包除原理}
-有限集合$A$と$B$に対して和集合の要素数$A \cup B$を求めるには，まずそれぞれに属する要素数$|A$と$B$を足し合わせ，その後$A$と$B$の積集合$A \cap B$の要素数を引けば良い．
+有限集合$A$と$B$に対して和集合の要素数$|A \cup B|$を求めるには，まずそれぞれに属する要素数$|A|$と$|B|$を足し合わせ，その後$A$と$B$の積集合$|A \cap B|$の要素数を引けば良い．
 具体的には，以下の式が成り立つ．
 \begin{equation}
     |A \cup B| = |A| + |B| - |A \cap B|
@@ -180,40 +185,175 @@ The findings of this study provide valuable solutions to both academic and pract
     \]
     が成り立つことをいう．
 \end{definition}
+
 多変数についても同様に定義される．
 
-\subsection{O記法の性質}
+\subsection{$O$記法の性質}
 
 以下に，$O$記法の基本的な性質を示す．
 
-\paragraph{和:}
-\[
-O(f(n)) + O(f(n)) = O(f(n)).
-\]
-
-\paragraph{積:}
-\[
-O(f(n))O(g(n)) = O(f(n)g(n)), \quad f(n)O(g(n)) = O(f(n)g(n)).
-\]
-
-\paragraph{定数倍:}
-\[
-O(cf(n)) = O(f(n)) \quad (c \neq 0).
-\]
+\begin{enumerate}
+    \item \textbf{和:} \[
+            O(f(n)) + O(f(n)) = O(f(n)).
+        \]
+    \item \textbf{積:}
+        \[
+            O(f(n))O(g(n)) = O(f(n)g(n)), \quad f(n)O(g(n)) = O(f(n)g(n)).
+        \]
+    \item \textbf{定数倍:}
+        \[
+            O(cf(n)) = O(f(n)) \quad (cは0でない定数).
+        \]
+\end{enumerate}
 
 \section{群}
+
 \subsection{群の定義}
+
+集合$G$とその上の二項演算$+: G \times G \to G$が群であるとは，以下の三つの条件を満たすことである．
+
+\begin{enumerate}
+    \item \textbf{結合則:} 任意の$a, b, c \in G$に対して，$(a + b) + c = a + (b + c)$が成り立つ．
+    \item \textbf{単位元の存在:} ある$e \in G$が存在して，任意の$a \in G$に対して，$a + e = e + a = a$が成り立つ．
+    \item \textbf{逆元の存在:} 任意の$a \in G$に対して，ある$b \in G$が存在して，$a + b = b + a = e$が成り立つ．
+\end{enumerate}
+
+なお本論文では，計算機上での二項演算は$O(1)$を仮定し，演算結果のことを和と呼ぶこととする．
+
+\subsection{可換群}
+
+群$(G, +)$が可換群であるとは，任意の$a, b \in G$に対して，$a + b = b + a$が成り立つことである．
+
 \subsection{群の性質}
 
-\section{累積和}
-\subsection{一次元累積和}
-\subsection{二次元累積和}
+本論文で用いる群の性質を以下に示す．
 
-\chapter{多次元累積和}
-\section{二次元累積和の包除原理による定式化}
-\section{包除原理を用いた三次元累積和の導出}
-\section{多次元累積和のアルゴリズム}
-\section{正当性の証明}
+\begin{lemma}
+    群$(G, +)$において，$-(a+b) = (-b) + (-a)$ が成り立つ．
+\end{lemma}
+
+\begin{proof}
+    $a + b + (-b) + (-a) = a + e + (-a) = a + (-a) = e$ より，$(-b) + (-a)$は $a + b$の逆元である．
+\end{proof}
+
+\begin{lemma}
+    $(G, +)$を群，$N \in \mathbb{N}$, $1$以上$N$以下の整数$i$に対して$A_i \in G$とする．このとき,
+
+    \begin{equation}
+        -(A_1 + A_2 + \ldots + A_{N}) = -A_N - A_{N-1} - \ldots - A_1
+    \end{equation}
+
+    が成り立つ．
+\end{lemma}
+
+\begin{proof}
+帰納法を用いて証明する。
+
+$N = 1$のときは明らかに成り立つ．
+
+$N = k$ のときに
+\[
+-(A_1 + A_2 + \ldots + A_k) = -A_k - A_{k-1} - \ldots - A_1
+\]
+が成り立つと仮定すると，$N = k+1$ のとき
+\begin{align}
+-(A_1 + A_2 + \ldots + A_{k+1}) &= -((A_1 + A_2 + \ldots + A_k) + A_{k+1}) \\ \notag
+&= -A_{k+1} - (A_1 + A_2 + \ldots + A_k) \quad  \notag
+( \because \text{補題1より}) \\ \notag
+&= -A_{k+1} -A_k - A_{k-1} - \ldots - A_1 \quad \notag
+( \because \text{仮定より}) \notag
+\end{align}
+となる．したがって，$N = k+1$ のときも成り立つ．
+
+\end{proof}
+
+
+\chapter{累積和}
+\section{一次元累積和}
+
+一次元累積和は，与えられた数列に対してその区間和を前計算することで，任意の区間の和を高速に求めるための手法である．具体的には，長さ$N \in \mathbb{N}$の数列$A$に対してクエリ$l, r$が与えられたとき
+
+\begin{equation}
+    \sum_{x=l}^{r} A_x
+\end{equation}
+
+の値を高速に求めることができる．
+
+\subsection{定義}
+$(G, +)$を群，$0$をその単位元とし，各要素が$G$の元である長さ$N$の数列$A = \{A_1, A_2, \ldots, A_N\}$ が与えられたとき，$A$の累積和$S = \{S_0, S_1, S_2, \ldots, S_N\}$は以下のように定義される．
+\begin{equation}
+    S_0 = 0, \quad S_i = \sum_{x=1}^{i} A_x \quad (1 \leq i \leq N)
+\end{equation}
+
+\subsection{構築}
+
+累積和の構築は，漸化式$S_i = S_{i-1} + A_i$を用いて$O(N)$で行うことができる．
+
+\subsection{クエリ処理}
+
+数列$A$の区間$[l, r]$の和を求めるクエリ処理は，以下の定理4により$O(1)$で行うことができる．
+
+\begin{theorem}
+    数列$A$の区間$[l, r]$の和は，$-S_{l-1} + S_r$で求めることができる．
+\end{theorem}
+
+\begin{proof}
+    \begin{align}
+        -S_{l-1} + S_r &= -\sum_{x=1}^{l-1} A_x + \sum_{x=1}^{r} A_x \notag \\
+        &= -(A_1 + A_2 + \ldots + A_{l-1}) + (A_1 + A_2 + \ldots + A_{l-1} + \ldots+ A_r) \notag \\
+        &= -A_{l-1} - A_{l-2} \ldots - A_1 + A_1 + A_2 + \ldots + A_{l-1} + A_l + \ldots + A_r \notag \\
+        &(\because \text{補題2より}) \notag \\
+        &= A_l + A_{l+1} + \ldots + A_r \notag
+        \notag
+    \end{align}
+    これはちょうど$A$の区間$[l, r]$の和である．
+\end{proof}
+
+\section{二次元累積和}
+
+二次元累積和は，一次元累積和を二次元配列に拡張したものである．具体的には，$H \times W$の二次元配列$A$に対してクエリ$(l_1, l_2, r_1, r_2)$が与えられたとき
+
+\begin{equation}
+    \sum_{x=l_1}^{r_1} \sum_{y=l_2}^{r_2} A_{i, j}
+\end{equation}
+
+の値を高速に求めることができる．
+
+\subsection{定義}
+$(G, +)$を可換群とする．一次元累積和と異なり，群に可換性を要請する理由については後述する．
+
+$H \times W$の二次元配列$A = \{A_{x, y}\}$が与えられたとき，$A$の二次元累積和$S = \{S_{i, j}\}$は以下のように定義される．
+
+\begin{align}
+    S_{i, 0} &= 0, \notag \\
+    S_{0, j} &= 0, \notag \\
+    S_{i, j} &= \sum_{x=1}^{i} \sum_{y=1}^{j} A_{x, y} \quad (1 \leq i \leq H, 1 \leq j \leq W)
+\end{align}
+
+\subsection{構築}
+二次元累積和の構築は，以下のアルゴリズムを用いて$O(HW)$で行うことができる．
+
+\begin{algorithm}
+    \caption{二次元累積和の構築}
+    \begin{algorithmic}[1]
+        \FOR{$i = 0$ to $H$}
+        \STATE $S_{i, 0} \leftarrow 0$
+        \ENDFOR
+        \FOR{$j = 0$ to $W$}
+        \STATE $S_{0, j} \leftarrow 0$
+        \ENDFOR
+        \FOR{$i = 1$ to $H$}
+        \FOR{$j = 1$ to $W$}
+        \STATE $S_{i, j} \leftarrow S_{i,j-1} + A_{i,j}$
+        \ENDFOR
+        \ENDFOR
+        \FOR{$j = 1$ to $W$}
+        \FOR{$i = 1$ to $H$}
+        \STATE $S_{i, j} \leftarrow S_{i-1,j} + S_{i,j}$
+        \ENDFOR
+        \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
 
 \chapter{性能評価}
 
@@ -236,3 +376,6 @@ O(cf(n)) = O(f(n)) \quad (c \neq 0).
 
 
 \end{document}
+
+
+
