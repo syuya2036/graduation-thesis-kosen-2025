@@ -1,4 +1,4 @@
-\documentclass{jsreport}
+\documentclass[11pt]{jsreport}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 \usepackage{amssymb}
@@ -6,8 +6,9 @@
 \usepackage{amsmath}
 \usepackage{algorithmic}
 \usepackage{algorithm}
+\usepackage{mathtools}
 
-\usepackage[margin=15truemm]{geometry}
+\usepackage[margin=18truemm]{geometry}
 
 \theoremstyle{plain} % デフォルトのスタイル
 
@@ -34,9 +35,7 @@
 \begin{abstract}
 This study focuses on the formalization of the theory of multidimensional cumulative sums and the development of efficient computation methods utilizing this theory. While cumulative sums are widely used to quickly compute range sums in one- and two-dimensional data arrays, research on extending this approach to higher-dimensional data and improving its computational efficiency remains insufficient. Building upon existing theories for one- and two-dimensional cumulative sums, this study proposes a generalized method that can be extended to arbitrary dimensions \(D\).
 
-The proposed method constructs an algorithm that achieves a computational complexity of \({O}(N 2^D)\) for preprocessing cumulative sums with data size \(N\) and \({O}(2^D)\) for query processing. By applying the principle of inclusion-exclusion, the method efficiently computes the total sum over arbitrary subregions in a multidimensional space. Additionally, leveraging bit representations for indices optimizes set operations in higher dimensions, simplifying the implementation process.
-
-Furthermore, this study investigates how computational time increases with the growth of the dimensionality \(D\) through numerical experiments.
+The proposed method constructs an algorithm that achieves a computational complexity of \({O}(N)\) for preprocessing cumulative sums with data size \(N\) and \({O}(2^D)\) for query processing. By applying the principle of inclusion-exclusion, the method efficiently computes the total sum over arbitrary subregions in a multidimensional space. Additionally, leveraging bit representations for indices optimizes set operations in higher dimensions, simplifying the implementation process.
 
 The findings of this study provide valuable solutions to both academic and practical challenges aimed at the efficient analysis of high-dimensional data. In particular, the generalization of multidimensional cumulative sums and insights into improving their computational efficiency are expected to contribute significantly to the advancement of high-dimensional data processing techniques.
 
@@ -168,6 +167,27 @@ The findings of this study provide valuable solutions to both academic and pract
 したがって、どんな$m$に対してもこの数え上げが常に $1$ であることが分かり、包除原理が成り立つことが示された。
 \end{proof}
 
+\subsection{重み付き包除原理}
+
+包除原理を拡張し，和集合の各要素に対する重みを考慮した重み付き包除原理（Weighted Inclusion-Exclusion Principle)を導入する．
+
+有限集合 $S_1, S_2$ に対して，各要素 $i$ に重み $W_i$ が付与されている場合，和集合の重み総和は以下のように求められる：
+\begin{equation}
+    \sum_{i \in |S_1 \cup S_2|} W_i = \sum_{i \in S_1} W_i + \sum_{i \in S_2} W_i - \sum_{i \in S_1 \cap S_2} W_i
+\end{equation}
+
+これを $n$ 個の集合 $S_1, S_2, \dots, S_n$ に拡張すると，次の重み付き包除原理が得られる．
+\begin{theorem}[重み付き包除原理]
+    任意の $n$ 個の集合 $S_1, S_2, \dots, S_n$ に対して，各要素 $i$ に重み $W_i$ がある場合，和集合の重み総和について以下の式が成り立つ：
+    \begin{align}
+    \sum_{i \in |\bigcup_{j=1}^{n} S_j|} W_i \notag
+    &= \sum_{j} \sum_{i \in S_j} W_i \notag \\
+    &\quad - \sum_{j_1 < j_2} \sum_{i \in S_{j_1} \cap S_{j_2}} W_i \notag \\
+    &\quad + \sum_{j_1 < j_2 < j_3} \sum_{i \in S_{j_1} \cap S_{j_2} \cap S_{j_3}} W_i \notag \\
+    &\quad - \cdots \notag \\
+    &\quad + (-1)^{n-1} \sum_{i \in S_1 \cap \cdots \cap S_n} W_i
+    \end{align}
+\end{theorem}
 \section{計算量}
 
 本章では、アルゴリズムの効率性を評価する指標として広く用いられる $O$ 記法とその基本的な性質について説明する．
@@ -354,6 +374,83 @@ $H \times W$の二次元配列$A = \{A_{x, y}\}$が与えられたとき，$A$�
         \ENDFOR
     \end{algorithmic}
 \end{algorithm}
+
+\newpage
+\subsection{クエリ処理}
+
+二次元累積和のクエリ処理は，以下の定理5により$O(1)$で行うことができる．
+
+\begin{theorem}
+    二次元配列$A$の区間$[l_1, r_1] \times [l_2, r_2]$の和は，$S_{r_1, r_2} - S_{l_1-1, r_2} - S_{r_1, l_2-1} + S_{l_1-1, l_2-1}$で求めることができる．
+\end{theorem}
+
+\begin{proof}
+    累積和 $S_{i,j}$ は，$A$ の左上$(0, 0)$から $(i, j)$ までの部分和である．すなわち，
+    \begin{equation}
+        S_{i, j} = \sum_{x=1}^{i} \sum_{y=1}^{j} A_{x, y}
+    \end{equation}
+
+    したがって，累積和の差分を計算すると，
+    \begin{align}
+        S_{r_1, r_2} - S_{l_1-1, r_2} &= \sum_{x=1}^{r_1} \sum_{y=1}^{r_2} A_{x, y} - \sum_{x=1}^{l_1-1} \sum_{y=1}^{r_2} A_{x, y} \notag \\
+        &= \sum_{x=l_1}^{r_1} \sum_{y=1}^{r_2} A_{x, y}
+    \end{align}
+
+    同様に，
+    \begin{align}
+        S_{r_1, l_2-1} - S_{l_1-1, l_2-1} &= \sum_{x=1}^{r_1} \sum_{y=1}^{l_2-1} A_{x, y} - \sum_{x=1}^{l_1-1} \sum_{y=1}^{l_2-1} A_{x, y} \notag \\
+        &= \sum_{x=l_1}^{r_1} \sum_{y=1}^{l_2-1} A_{x, y}
+    \end{align}
+
+    以上より，
+    \begin{align}
+        (S_{r_1, r_2} - S_{l_1-1, r_2}) - (S_{r_1, l_2-1} - S_{l_1-1, l_2-1}) &= \sum_{x=l_1}^{r_1} \sum_{y=1}^{r_2} A_{x, y} - \sum_{x=l_1}^{r_1} \sum_{y=1}^{l_2-1} A_{x, y} \notag \\
+        &= \sum_{x=l_1}^{r_1} \sum_{y=l_2}^{r_2} A_{x, y}
+    \end{align}
+    これはちょうど $A$ の区間 $[l_1, r_1] \times [l_2, r_2]$ の和である．
+\end{proof}
+
+\subsection{重み付き包除原理による考察}
+
+二次元累積和のクエリ処理において，重み付き包除原理を用いて定理6. を証明することができる．
+
+\begin{proof}
+二次元配列$A$を$A_{i, j}$が重みの重み付き集合であるとみなすと，さらに$A$の重み付き部分集合$W_{i, j}$を以下のように定義する：
+
+\begin{equation}
+    W_{i, j} = \{A_{x, y} | 1 \leq x \leq i, 1 \leq y \leq j\}
+\end{equation}
+
+ここで，
+
+\begin{align}
+    \sum_{x=l_1}^{r_1} \sum_{y=l_2}^{r_2} A_{i, j}
+    &= \sum_{i \in [l_1, r_1] \times [l_2, r_2]} A_{i, j} \notag \\
+    &= \sum_{w \in W_{r_1, r_2}} w - \sum_{w \in |W_{l_1-1, r_2} \cup W_{r_1, l_2-1}|} w \notag \\
+    &= \sum_{w \in W_{r_1, r_2}} w - \left( \sum_{w \in W_{l_1-1, r_2}} w + \sum_{w \in W_{r_1, l_2-1}} w - \sum_{w \in |W_{l_1-1, r_2}\cap W_{r_1, l_2-1}|} w \right) \notag \\
+    & (\therefore \text{重み付き包除原理より}) \notag \\
+\end{align}
+
+と表すことができ，特に$W_{i, j}$の要素の重み総和が$S_{i, j}$が等しいこと，および$|W_{l_1-1, r_2}\cap W_{r_1, l_2-1}| = W_{l_1-1, l_2-1}$であることから，式$(3.10)$は
+
+\begin{align}
+    \sum_{x=l_1}^{r_1} \sum_{y=l_2}^{r_2} A_{i, j} &= S_{r_1, r_2} - S_{l_1-1, r_2} - S_{r_1, l_2-1} + S_{l_1-1, l_2-1}
+\end{align}
+
+であることが示された．\end{proof}
+
+この式は次のように解釈できる．
+
+\begin{itemize}
+    \item $S_{r_1, r_2}$ は $[1, r_1] \times [1, r_2]$ にあるすべての重みの合計である。
+    \item $S_{l_1-1, r_2}$ を引くことで、$[1, l_1-1] \times [1, r_2]$ の範囲を除去する。
+    \item $S_{r_1, l_2-1}$ を引くことで、$[1, r_1] \times [1, l_2-1]$ の範囲を除去する。
+    \item しかし、$[1, l_1-1] \times [1, l_2-1]$ の範囲が二重に引かれているため、$S_{l_1-1, l_2-1}$ を加える。
+\end{itemize}
+
+
+
+
 
 \chapter{性能評価}
 
