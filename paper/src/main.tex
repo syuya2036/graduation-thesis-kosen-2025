@@ -49,14 +49,13 @@ The findings of this study provide valuable solutions to both academic and pract
 
 \section{背景}
 
-累積和のアルゴリズムは、データ列に対する区間和の計算を高速に行うための手法として、情報処理のさまざまな場面で広く利用されてきた。一次元累積和の基本的な考え方は、与えられたデータ列に対してあらかじめ前計算をしておくことで、後続のクエリに対して効率的な応答を可能にするというものである。これにより、区間和の計算を単純な反復処理による計算量 \({O}(N)\) から定数時間の計算量 \({O}(1)\) に削減することができる。累積和の概念は二次元へと拡張され、画像処理や地理情報システム（GIS）、データ分析など、より広範な分野においても応用が進んだ。
+累積和のアルゴリズムは，データ列に対する区間和の計算を高速に行うための手法として，情報処理のさまざまな場面で広く利用されてきた．一次元累積和の基本的な考え方は，与えられたデータ列に対してあらかじめ前計算をしておくことで，後続のクエリに対して効率的な応答を可能にするというものである．これにより，区間和の計算を単純な反復処理による計算量 \({O}(N)\) から定数時間の計算量 \({O}(1)\) に削減することができる．累積和の概念は二次元へと拡張され，文字列処理，数値計算，画像処理などのより広範な分野においても応用が進んだ\cite{BlellochTR90}．
 
-しかしながら、現行の累積和アルゴリズムは主に一次元または二次元のデータを対象としており、人間が視覚的に直感しやすい次元に留まっているのが現状である。三次元以上の高次元データに関する累積和アルゴリズムは十分に一般化されておらず、理論的な整備や実装の試みは限られている。
+しかしながら，現行の累積和アルゴリズムは主に一次元または二次元のデータを対象としており，人間が視覚的に直感しやすい次元に留まっているのが現状である．三次元以上の高次元データに関する累積和アルゴリズムは十分に一般化されておらず，理論的な整備や実装の試みは限られている．
 
-近年、データサイエンスや機械学習、ビッグデータ解析の発展に伴い、膨大な高次元データを扱う機会が増加している。例えば、画像解析では通常は二次元データが用いられるが、時間軸を加えることで三次元、さらに複数のセンサ情報を統合すれば四次元以上のデータが生成される。同様に、地理情報システム（GIS）や物理シミュレーションでは、空間的次元に時間的要素や他の物理的変数を組み合わせた多次元データが扱われることが一般的である。これらの応用分野において、任意の次元に対応する累積和アルゴリズムの理論的基盤が整備されていれば、これまで計算上の困難が伴っていた高次元データ解析の課題に対して実用的な解決策を提供できる可能性がある．
+近年，データサイエンスや機械学習，ビッグデータ解析の発展に伴い，膨大な高次元データを扱う機会が増加している．例えば，画像解析では通常は二次元データが用いられるが，時間軸を加えることで三次元，さらに複数のセンサ情報を統合すれば四次元以上のデータが生成される．同様に，地理情報システム（GIS）や物理シミュレーションでは，空間的次元に時間的要素や他の物理的変数を組み合わせた多次元データが扱われることが一般的である．これらの応用分野において，任意の次元に対応する累積和アルゴリズムの理論的基盤が整備されていれば，これまで計算上の困難が伴っていた高次元データ解析の課題に対して実用的な解決策を提供できる可能性がある．
 
-本研究では、一次元および二次元累積和の基礎理論を出発点として、それを三次元以上の高次元データに拡張するための理論の定式化と計算アルゴリズムの構築を目指した。このような理論の整備は、将来的に高次元データ解析が必要となる際に大きな利便性をもたらすだろう。
-
+本研究では，一次元および二次元累積和の基礎理論を出発点として，それを三次元以上の高次元データに拡張するための理論の定式化と計算アルゴリズムの構築を目指した．このような理論の整備は，将来的に高次元データ解析が必要となる際に大きな利便性をもたらすだろう．
 
 % \newpage
 \section{目的}
@@ -64,20 +63,23 @@ The findings of this study provide valuable solutions to both academic and pract
 本研究の目的を以下に示す．
 
 \begin{enumerate}
-    \item \textbf{ビット表記を用いた多次元累積和のアルゴリズムを示し、その正当性を包除原理を用いて証明する:}
+    \item \textbf{ビット表記を用いた多次元累積和のアルゴリズムを示し，その正当性を包除原理を用いて証明する:}
 
 
-     高次元データの各次元の添字が複数の集合を定義し、これらの集合に対して包除原理を適用することで任意の部分領域における総和を効率的に計算する仕組みを構築する。この定式化において、添字をビット表記で表現することで、高次元空間における集合演算を効率化し、アルゴリズムの単純化および計算効率の向上を図る。
+     高次元データの各次元の添字が複数の集合を定義し，これらの集合に対して包除原理を適用することで任意の部分領域における総和を効率的に計算する仕組みを構築する．この定式化において，添字をビット表記で表現することで，高次元空間における集合演算を効率化し，アルゴリズムの単純化および計算効率の向上を図る．
 
     \item \textbf{多次元累積和アルゴリズムのプログラムによる実装を示す:}
 
-    この実装では、理論で示したアルゴリズムの構築手順を忠実に再現するとともに、プログラムの汎用性および可読性を考慮した設計を行う。
+    この実装では，理論で示したアルゴリズムの構築手順を忠実に再現するとともに，プログラムの汎用性および可読性を考慮した設計を行う．
 
 \end{enumerate}
 
 \chapter{準備}
 
 \section{集合論}
+
+本章では，本研究で用いる集合論の基本的な概念と記法について説明する\cite{book1}．
+
 \subsection{記法}
 
 \begin{itemize}
@@ -144,7 +146,7 @@ The findings of this study provide valuable solutions to both academic and pract
         \end{align}
 \end{theorem}
 
-これを包除原理(Principle of Inclusion-Exclusion, PIE)という．
+これを包除原理(Principle of Inclusion-Exclusion, PIE)という\cite{wiki:Inclusion–exclusion_principle}．
 
 \begin{proof}
 集合ちょうど$m$個の共通部分は，右辺第$k$項において$(-1)^{k-1}\binom{m}{k}$だけ足されるので，合計で
@@ -153,7 +155,7 @@ The findings of this study provide valuable solutions to both academic and pract
 \]
 となる．
 
-ここで、二項定理より
+ここで，二項定理より
 \begin{align}
     0 &= (1 - 1)^m  \notag \\
     &= \sum_{k=0}^m \binom{m}{k} (-1)^k  \notag \\
@@ -162,7 +164,7 @@ The findings of this study provide valuable solutions to both academic and pract
     \therefore &\sum_{k=1}^m (-1)^{k-1} \binom{m}{k} = 1\notag
 \end{align}
 
-したがって、どんな$m$に対してもこの数え上げが常に $1$ であることが分かり、包除原理が成り立つことが示された。
+したがって，どんな$m$に対してもこの数え上げが常に $1$ であることが分かり，包除原理が成り立つことが示された．
 \end{proof}
 
 \subsection{重み付き包除原理}
@@ -188,7 +190,7 @@ The findings of this study provide valuable solutions to both academic and pract
 \end{theorem}
 \section{計算量}
 
-本章では、アルゴリズムの効率性を評価する指標として広く用いられる $O$ 記法とその基本的な性質について説明する．
+本章では，アルゴリズムの効率性を評価する指標として広く用いられる $O$ 記法とその基本的な性質について説明する\cite{book1}．
 
 \subsection{$O$記法}
 
@@ -225,6 +227,8 @@ The findings of this study provide valuable solutions to both academic and pract
 \end{enumerate}
 
 \section{群}
+
+本章では，本研究で用いる代数的構造である群の定義と性質について説明する\cite{book2}．
 
 \subsection{群の定義}
 
@@ -265,7 +269,7 @@ The findings of this study provide valuable solutions to both academic and pract
 \end{lemma}
 
 \begin{proof}
-帰納法を用いて証明する。
+帰納法を用いて証明する．
 
 $N = 1$のときは明らかに成り立つ．
 
@@ -289,7 +293,7 @@ $N = k$ のときに
 \chapter{既存手法}
 \section{一次元累積和}
 
-一次元累積和は，与えられた数列に対してその区間和を前計算することで，任意の区間の和を高速に求めるための手法である．具体的には，長さ$N \in \mathbb{N}$の数列$A$に対してクエリ$l, r$が与えられたとき
+一次元累積和は，与えられた数列に対してその区間和を前計算することで，任意の区間の和を高速に求めるための手法である\cite{wiki:Prefix_sum}．具体的には，長さ$N \in \mathbb{N}$の数列$A$に対してクエリ$l, r$が与えられたとき
 
 \begin{equation}
     \sum_{x=l}^{r} A_x
@@ -448,10 +452,10 @@ $H \times W$の二次元配列$A = \{A_{x, y}\}$が与えられたとき，$A$�
 この式は次のように解釈できる．
 
 \begin{itemize}
-    \item $S_{r_1, r_2}$ は $[1, r_1] \times [1, r_2]$ にあるすべての重みの合計である。
-    \item $S_{l_1-1, r_2}$ を引くことで、$[1, l_1-1] \times [1, r_2]$ の範囲を除去する。
-    \item $S_{r_1, l_2-1}$ を引くことで、$[1, r_1] \times [1, l_2-1]$ の範囲を除去する。
-    \item しかし、$[1, l_1-1] \times [1, l_2-1]$ の範囲が二重に引かれているため、$S_{l_1-1, l_2-1}$ を加える。
+    \item $S_{r_1, r_2}$ は $[1, r_1] \times [1, r_2]$ にあるすべての重みの合計である．
+    \item $S_{l_1-1, r_2}$ を引くことで，$[1, l_1-1] \times [1, r_2]$ の範囲を除去する．
+    \item $S_{r_1, l_2-1}$ を引くことで，$[1, r_1] \times [1, l_2-1]$ の範囲を除去する．
+    \item しかし，$[1, l_1-1] \times [1, l_2-1]$ の範囲が二重に引かれているため，$S_{l_1-1, l_2-1}$ を加える．
 \end{itemize}
 
 \begin{figure}
@@ -556,49 +560,98 @@ $D$次元配列$A = \{A_{x_1, x_2, \ldots, x_D}\}$が与えられたとき，$A$
 \end{lemma}
 
 \begin{proof}
-    左辺の$\bigcap_{i=1}^{K} W_{\mathbf{y}_i}$は、すべての$1 \leq i \leq K$に対して$(x_1, x_2, \ldots, x_D) \in W{\mathbf{y}_i}$であるような添字の集合である。
-    これは、すべての$i$について条件を満たす必要があるため、$x_i$に対する上限は各$y_{i}$の最小値、すなわち$\min(y_{1,d}, y_{2,d}, \ldots, y_{K,d})$となる。
+    左辺の$\bigcap_{i=1}^{K} W_{\mathbf{y}_i}$は，すべての$1 \leq i \leq K$に対して$(x_1, x_2, \ldots, x_D) \in W{\mathbf{y}_i}$であるような添字の集合である．
+    これは，すべての$i$について条件を満たす必要があるため，$\bigcap_{i=1}^{K} W_{\mathbf{y}_i}$の$d$番目の要素$x_d$に対する上限は各$\mathbf{y_i}$の$d$番目の要素$y_{i,d}$の最小値，すなわち$\min(y_{1,d}, y_{2,d}, \ldots, y_{K,d})$となる．
+    いま，各$i$に対して$\mathbf{y}_i$の$d$番目のビットが$1$であるかどうかは$y_{i,d} = r_d$であるかどうかと等価であり，一般に$l_d-1 < r_d$であることから，$\bigcap_{i=1}^{K} W_{\mathbf{y}_i}$の$d$番目の要素$x_d$は$\mathbf{y}_1 \& \mathbf{y}_2 \& \ldots \& \mathbf{y}_K$の$d$番目のビットと等しい．
 \end{proof}
 
+\begin{theorem}
+    $D$次元配列$A$の区間$[l_1, r_1] \times [l_2, r_2] \times \ldots \times [l_D, r_D]$の和は，以下の式で求めることができる．ここで，$popcount(x)$は$x$を二進数表記した時の$1$の数を数える関数である．
+    \begin{equation}
+        \sum_{\mathbf{m}=0}^{2^D-1} (-1)^{popcount(\mathbf{m}) - (D \bmod 2)} \ S_{\mathbf{m}}
+    \end{equation}
+\end{theorem}
 
-% よって，区間$[l_1, r_1] \times [l_2, r_2] \times \ldots \times [l_D, r_D]$の和を求めるクエリ処理は，以下のアルゴリズムにより$O(2^D)$で行うことができる．$popcount(x)$は$x$を二進数表記した時の$1$の数を数える関数であり，計算量は$O(1)$を仮定する．
-% \begin{algorithm}
-%     \caption{多次元累積和のクエリ処理}
-%     \begin{algorithmic}[1]
-%                 \STATE \COMMENT{区間の総和を求める}
-%         \STATE $sum \leftarrow 0$
-%         \FOR{$mask = 0$ to $2^D - 1$}
-%             \STATE $(y_1, y_2, \dots, y_D) \leftarrow (l_1-1, l_2-1, \dots, l_D-1)$
-%             \FOR{$i = 1$ to $D$}
-%                 \IF{$(mask  \text{ bitwise AND }  (1 \ll (i-1))) = 0$}
-%                     \STATE $y_i \leftarrow r_i$
-%                 \ENDIF
-%             \ENDFOR
-%             \STATE \COMMENT{符号の決定}
-%             \IF{$popcount(mask) \bmod 2 =  D \bmod 2$}
-%                 \STATE $sum \leftarrow sum + S_{y_1, y_2, \dots, y_D}$
-%             \ELSE
-%                 \STATE $sum \leftarrow sum - S_{y_1, y_2, \dots, y_D}$
-%             \ENDIF
-%         \ENDFOR
-%         \RETURN $sum$
+\begin{proof}
+    $\mathbf{r} = (r_1, r_2, \ldots, r_D), \mathbf{l}_d-1 = (r_1, r_2, \ldots, l_d-1, \ldots, r_D)$とすると，
+    区間$[l_1, r_1] \times [l_2, r_2] \times \ldots \times [l_D, r_D]$は，$D$次元の添字集合$W_{\mathbf{r}}$から$\bigcup_{d=1}^{D} W_{\mathbf{l}_d-1}$を引いたものである．
+    したがって，重み付き包除原理より
+    \begin{align}
+        \sum_{x_1=l_1}^{r_1} \sum_{x_2=l_2}^{r_2} \ldots \sum_{x_D=l_D}^{r_D} A_{x_1, x_2, \ldots, x_D} &= \sum_{(x_1, x_2, \ldots, x_D) \in W_{\mathbf{r}}} A_{x_1, x_2, \ldots, x_D} \notag \\
+        &- \sum_{(x_1, x_2, \ldots, x_D) \in \bigcup_{d=1}^{D} W_{\mathbf{l}_d-1}} A_{x_1, x_2, \ldots, x_D} \notag \\
+        &= \sum_{(x_1, x_2, \ldots, x_D) \in W_{\mathbf{r}}} A_{x_1, x_2, \ldots, x_D} \notag \\
+        &- \sum_{i_1<i_2} \sum_{(x_1, x_2, \ldots, x_D) \in W_{\mathbf{l}_{i_1}-1} \cap W_{\mathbf{l}_{i_2}-1}} A_{x_1, x_2, \ldots, x_D} \notag \\
+        &+ \sum_{i_1<i_2<i_3} \sum_{(x_1, x_2, \ldots, x_D) \in W_{\mathbf{l}_{i_1}-1} \cap W_{\mathbf{l}_{i_2}-1} \cap W_{\mathbf{l}_{i_3}-1}} A_{x_1, x_2, \ldots, x_D} \notag \\
+        &- \ldots \notag \\
+        &+ (-1)^{D} \sum_{(x_1, x_2, \ldots, x_D) \in \bigcap_{d=1}^{D} W_{\mathbf{l}_d-1}} A_{x_1, x_2, \ldots, x_D} \notag \\
+    \end{align}
+    が成り立つ．
+    ここで，右辺第$k$項$(1\leq k \leq D+1)$は，$k$個の集合の積集合の重み和を表しており，補題3より添字をビット表記した際の$1$の個数がちょうど$D-k+1$個であるような集合についての和である．
+    また右辺第$k$項の符号は$(-1)^{k+1}$であり，$D$が偶数のとき$(-1)^{popcount(m)}$，奇数のとき$(-1)^{popcount(m)-1}$である．
 
-%     \end{algorithmic}
-% \end{algorithm}
+    よって求める和は，$D$が偶数のとき
+    \begin{equation}
+        \sum_{k=1}^{D+1} (-1)^{k+1} \sum_{\{\mathbf{m} | 0\leq \mathbf{m} \leq 2^D-1, popcount(\mathbf{m}) = D-k+1\}} S_{\mathbf{m}} \notag
+    \end{equation}
+
+    $D$が奇数のとき
+    \begin{equation}
+        \sum_{k=1}^{D+1} (-1)^{k} \sum_{\{\mathbf{m} | 0\leq \mathbf{m} \leq 2^D-1, popcount(\mathbf{m}) = D-k+1\}} S_{\mathbf{m}} \notag
+    \end{equation}
+    であり，これをまとめると
+    \begin{equation}
+        \sum_{\mathbf{m}=0}^{2^D-1} (-1)^{popcount(\mathbf{m}) - (D \bmod 2)} \ S_{\mathbf{m}}
+    \end{equation}
+    が得られる．
+\end{proof}
+
+以上より，区間$[l_1, r_1] \times [l_2, r_2] \times \ldots \times [l_D, r_D]$の和を求めるクエリ処理は，以下のAlgorithm 3により$O(2^D)$で行うことができる．$popcount(x)$は$x$を二進数表記した時の$1$の数を数える関数であり，計算量は$O(1)$を仮定する．
+\begin{algorithm}
+    \caption{多次元累積和のクエリ処理}
+    \begin{algorithmic}[1]
+                \STATE \COMMENT{区間の総和を求める}
+        \STATE $sum \leftarrow 0$
+        \FOR{$mask = 0$ to $2^D - 1$}
+            \STATE $(y_1, y_2, \dots, y_D) \leftarrow (l_1-1, l_2-1, \dots, l_D-1)$
+            \FOR{$i = 1$ to $D$}
+                \IF{$(mask  \text{ bitwise AND }  (1 \ll (i-1))) = 0$}
+                    \STATE $y_i \leftarrow r_i$
+                \ENDIF
+            \ENDFOR
+            \STATE \COMMENT{符号の決定}
+            \IF{$popcount(mask) \bmod 2 =  D \bmod 2$}
+                \STATE $sum \leftarrow sum + S_{y_1, y_2, \dots, y_D}$
+            \ELSE
+                \STATE $sum \leftarrow sum - S_{y_1, y_2, \dots, y_D}$
+            \ENDIF
+        \ENDFOR
+        \RETURN $sum$
+
+    \end{algorithmic}
+\end{algorithm}
+
+\chapter{今後の展望}
+
+本研究で提案する手法は特に高次元データを取り扱う場面で有効であり，データ解析や機械学習の分野における特徴量抽出の高速化などに応用が期待される．また，今後の展望として実際のプログラムとしての実装と速度検証が挙げられる．
 
 \chapter*{謝辞}
-本研究を進めるにあたり,xxxxx 氏に深く感謝いたします. ありがとうございました.
+本研究をするにあたり, さまざまな面でご指導, ご意見を承りました一
+関工業高等専門学校未来創造工学科情報・ソフトウェア系千田栄幸教授，副査の小保方幸次教授，小林健一准教授に深く感謝いたします．また，共に研究に取り組んだ同研究室の齋暖斗氏，OpenAI ChatGPT，GitHub Copilotに深く感謝いたします．
 
 \begin{thebibliography}{99}
-\bibitem{card}水木敬明, "カード組を用いた秘密計算", 電子情報通信学会 基礎・境界ソサイエティ Fundamentals Review, 2016年9巻3号pp179-187, 2016.
 
-\bibitem{3card}Raimu Isuzugawa, Kodai Toyoda, Yu Sasaki, Daiki Miyahara, Takaaki Mizuki, "A Card-Minimal Three-Input AND Protocol Using Two Shuffles", Computing and Combinatorics (COCOON 2021), 2021.
+\bibitem{BlellochTR90}Guy~E. Blelloch, "Prefix Sums and Their Applications", School of Computer Science, Carnegie Mellon University, CMU-CS-90-190, Nov. 1990.
+
+\bibitem{book1}守屋悦朗, "コンピュータサイエンスのための離散数学", サイエンス社, 1992
+
+\bibitem{wiki:Inclusion–exclusion_principle}Wikipedia, "{Inclusion–exclusion principle}", 2025, \url{https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle} (参照 2025-01-20)
 
 
+\bibitem{book2}雪江明彦, "群論入門 第2版", 日本評論社, 2023,
 
-\bibitem{evaluation}吉田拓叶, 千田栄幸, 水木敬明, "説明動画再生時間に基づくカードベースプロトコルの評価", 電子情報通信学会 2023年暗号と情報セキュリティシンポジウム予稿集, 4F2-1, 2023
+\bibitem{wiki:Prefix_sum}Wikipedia, "{Prefix sum}", 2025, \url{https://en.wikipedia.org/wiki/Prefix_sum} (参照 2025-01-20)
 
-\bibitem{himitu}NRI 野村総合研究所, "秘密計算|用語解説|野村総合研究所", \url{https://www.nri.com/jp/knowledge/glossary/lst/ha/secure_computation}, （参照2023-02-10）
+\bibitem{book3}斎藤信男, 西原清一, "データ構造とアルゴリズム", コロナ社, 1998
 
 \end{thebibliography}
 
