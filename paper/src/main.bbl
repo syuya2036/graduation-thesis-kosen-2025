@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{BlellochTR90}
+Guy~E. Blelloch.
+\newblock Prefix sums and their applications.
+\newblock Technical Report CMU-CS-90-190, School of Computer Science, Carnegie
+  Mellon University, November 1990.
+
+\bibitem{book1}
+悦朗守屋.
+\newblock コンピュータサイエンスのための離散数学.
+\newblock No.~61 in Information & computing. サイエンス社, 1992.
+
+\bibitem{wiki:Inclusion^^e2^^80^^93exclusion_principle}
+Wikipedia.
+\newblock {Inclusion^^e2^^80^^93exclusion principle} --- {W}ikipedia{,} the
+  free encyclopedia.
+\newblock
+  \url{http://en.wikipedia.org/w/index.php?title=Inclusion\%E2\%80\%93exclusion\%20principle&oldid=1272206802},
+  2025.
+\newblock [Online; accessed 12-February-2025].
+
+\end{thebibliography}
